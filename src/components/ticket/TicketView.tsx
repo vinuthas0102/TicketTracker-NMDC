@@ -369,13 +369,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
                         )}
                       </div>
                       
-                      {/* Add Workflow Step Button - Always Visible */}
-                      {canEdit() && !stepsCollapsed && (
-                        <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1.5 text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg interactive-hover flex items-center space-x-1">
-                          <span>+ Add Step</span>
-                        </button>
-                      )}
-                      
                       <button
                         onClick={() => setStepsCollapsed(!stepsCollapsed)}
                         className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors duration-200 hover:bg-gray-100 rounded-lg interactive-hover"
@@ -387,7 +380,7 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
 
                     {/* Scrollable Content Area */}
                     {!stepsCollapsed && (
-                      <div className="mt-3 pt-2 border-t border-gray-200/50 flex-1 overflow-y-auto animate-scaleIn">
+                      <div className="mt-3 pt-2 border-t border-gray-200/50 flex-1 overflow-y-auto animate-scaleIn max-h-96">
                         <StepManagement 
                           ticket={ticket} 
                           canManage={canEdit()} 
@@ -402,8 +395,8 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
             </div>
 
             {/* Right Side - Audit Trail */}
-            <div className="lg:w-1/3 lg:h-full">
-              <div className="glass-card h-full lg:h-screen lg:sticky lg:top-4">
+            <div className="lg:w-1/3">
+              <div className="glass-card lg:h-screen lg:sticky lg:top-4">
                 <div className="compact-card h-full flex flex-col">
                   <h2 className="text-base font-bold gradient-text mb-3">
                     {viewingDocument ? 'Document Viewer' : `Audit Trail (${ticket.auditTrail.length})`}
