@@ -351,8 +351,9 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
               {/* Steps Section - Only for EO and DO */}
               {user?.role !== 'EMPLOYEE' && (
                 <div className="glass-card rounded-xl">
-                  <div className="compact-card">
-                    <div className="flex items-center justify-between">
+                  <div className="compact-card h-full flex flex-col">
+                    {/* Fixed Header */}
+                    <div className="flex items-center justify-between flex-shrink-0">
                       <div className="flex items-center space-x-2">
                         <h2 className="text-base font-bold gradient-text">Workflow Management ({totalSteps})</h2>
                         {totalSteps > 0 && (
@@ -368,6 +369,13 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
                         )}
                       </div>
                       
+                      {/* Add Workflow Step Button - Always Visible */}
+                      {canEdit() && !stepsCollapsed && (
+                        <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1.5 text-sm rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg interactive-hover flex items-center space-x-1">
+                          <span>+ Add Step</span>
+                        </button>
+                      )}
+                      
                       <button
                         onClick={() => setStepsCollapsed(!stepsCollapsed)}
                         className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors duration-200 hover:bg-gray-100 rounded-lg interactive-hover"
@@ -377,8 +385,9 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
                       </button>
                     </div>
 
+                    {/* Scrollable Content Area */}
                     {!stepsCollapsed && (
-                      <div className="mt-3 pt-2 border-t border-gray-200/50 animate-scaleIn">
+                      <div className="mt-3 pt-2 border-t border-gray-200/50 flex-1 overflow-y-auto animate-scaleIn">
                         <StepManagement 
                           ticket={ticket} 
                           canManage={canEdit()} 
