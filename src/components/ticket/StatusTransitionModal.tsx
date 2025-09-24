@@ -26,8 +26,6 @@ const StatusTransitionModal: React.FC<StatusTransitionModalProps> = ({
   const [documentValidationErrors, setDocumentValidationErrors] = useState<string[]>([]);
   const { changeTicketStatus } = useTickets();
 
-  if (!isOpen) return null;
-
   // Check if all mandatory documents are uploaded for resolution
   const validateMandatoryDocuments = (): string[] => {
     const errors: string[] = [];
@@ -54,6 +52,8 @@ const StatusTransitionModal: React.FC<StatusTransitionModalProps> = ({
       setDocumentValidationErrors([]);
     }
   }, [selectedStatus, ticket.steps]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
