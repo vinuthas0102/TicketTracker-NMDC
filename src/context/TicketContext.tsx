@@ -238,6 +238,14 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
       if (!user) throw new Error('User not authenticated');
       if (!selectedModule) throw new Error('No module selected');
       
+      // Check if file upload is required for DO users completing steps
+      if (user.role === 'DO' && updates.status === 'COMPLETED') {
+        // Check if attachments are provided
+        if (!updates.attachments || updates.attachments.length === 0) {
+          throw new Error('File upload is mandatory for department officers when completing steps. Please upload at least one document.');
+        }
+      }
+      
       await TicketService.updateStep(ticketId, stepId, updates, user.id);
       
       // Reload tickets to get the updated list
