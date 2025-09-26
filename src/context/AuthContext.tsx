@@ -75,13 +75,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       console.log('🔍 AuthContext: Loading modules...');
       const modules = await AuthService.getAvailableModules();
-      console.log('🔍 AuthContext: Loaded modules:', modules.length, modules.map(m => ({ 
-        id: m.id, 
-        name: m.name, 
-        active: m.active,
-        validUUID: m.id && m.id.length === 36
-      })));
+      console.log('🔍 AuthContext: Loaded modules from service:', modules.length);
+      console.log('🔍 AuthContext: Module names received:', modules.map(m => m.name));
+      console.log('🔍 AuthContext: Setting availableModules state...');
       setAvailableModules(modules);
+      console.log('🔍 AuthContext: availableModules state set successfully');
     } catch (error) {
       console.error('🔍 Failed to load modules:', error);
       // Set empty array to prevent infinite loading

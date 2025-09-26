@@ -180,7 +180,7 @@ export class AuthService {
   }
 
   static async getAvailableModules(): Promise<Module[]> {
-    // Mock modules for demo mode
+    // FORCE MOCK MODE - Always use mock modules for now
     const mockModules: Module[] = [
       {
         id: '550e8400-e29b-41d4-a716-446655440001',
@@ -244,66 +244,24 @@ export class AuthService {
       }
     ];
 
-    console.log('🔍 AuthService: Loading modules - total mock modules:', mockModules.length);
+    console.log('🔍 AuthService: FORCED MOCK MODE - Loading modules...');
+    console.log('🔍 AuthService: Total mock modules defined:', mockModules.length);
     console.log('🔍 AuthService: Mock modules details:', mockModules.map(m => ({ 
       id: m.id, 
       name: m.name, 
-      active: m.active, 
+      active: m.active,
       categories: m.config.categories.length,
       validUUID: isValidUUID(m.id)
     })));
 
-    // If Supabase is not available, return mock modules
-    if (!isSupabaseAvailable()) {
-      console.log('🔍 Supabase not available, returning mock modules:', mockModules.length);
-      return mockModules;
-    }
+    // Filter only active modules (all should be active)
+    const activeModules = mockModules.filter(module => module.active !== false);
+    console.log('🔍 AuthService: Active modules after filtering:', activeModules.length);
 
-    try {
-      const { data: modules, error } = await supabase
-        ?.from('modules')
-        .select('*')
-        .eq('active', true)
-        .order('name');
-
-      if (error) {
-        console.warn('🔍 Supabase modules query failed, falling back to mock data:', error);
-        return mockModules;
-      }
-
-      const dbModules = modules?.map(module => ({
-        id: module.id,
-        name: module.name,
-        description: module.description || '',
-        icon: module.icon || 'FileText',
-        color: module.color || 'from-blue-500 to-indigo-500',
-        schema_id: module.schema_id,
-        config: {
-          categories: Array.isArray(module.config?.categories) 
-            ? module.config.categories 
-            : ['General'],
-          ...module.config
-        },
-        active: module.active || true,
-        created_at: new Date(module.created_at),
-        updated_at: new Date(module.updated_at)
-      }))
-      .filter(module => {
-        // Filter out modules with invalid UUID format
-        const isValid = isValidUUID(module.id);
-        if (!isValid) {
-          console.warn(`🔍 Filtering out module with invalid UUID: ${module.id} (${module.name})`);
-          return false;
-        }
-        return true;
-      });
-
-      console.log('🔍 Database modules loaded:', dbModules?.length || 0);
-      console.log('🔍 Final modules being returned:', dbModules && dbModules.length > 0 ? dbModules.length : mockModules.length);
-      return dbModules && dbModules.length > 0 ? dbModules : mockModules;
-    } catch (error) {
-      console.warn('🔍 Supabase connection failed, using mock data:', error);
-      return mockModules; // Fallback to mock data on error
-    }
+    // NO UUID VALIDATION FOR NOW - Return all active modules
+    console.log('🔍 AuthService: Final modules being returned:', activeModules.length);
+    console.log('🔍 AuthService: Module names:', activeModules.map(m => m.name));
+    
+    return activeModules;
   }
 }

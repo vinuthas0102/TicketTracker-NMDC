@@ -6,13 +6,8 @@ const ModuleSelection: React.FC = () => {
   const { availableModules, selectModule } = useAuth();
 
   console.log('🔍 ModuleSelection: Available modules:', availableModules.length);
-  console.log('🔍 ModuleSelection: Module details:', availableModules.map(m => ({ 
-    id: m.id, 
-    name: m.name, 
-    active: m.active,
-    hasCategories: m.config?.categories?.length > 0,
-    validUUID: m.id && m.id.length === 36
-  })));
+  console.log('🔍 ModuleSelection: Module names:', availableModules.map(m => m.name));
+  console.log('🔍 ModuleSelection: Module active status:', availableModules.map(m => ({ name: m.name, active: m.active })));
 
   const getIconComponent = (iconName: string) => {
     // Map icon names to actual Lucide icons
