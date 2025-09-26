@@ -679,6 +679,14 @@ export class TicketService {
       console.warn(`UUID validation warning: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
+    // Check if file upload is required for DO users completing steps
+    const isFileUploadRequired = updates.status === 'COMPLETED' && 
+                                updates.userRole === 'DO' && 
+                                (!updates.attachments || updates.attachments.length === 0);
+    
+    if (isFileUploadRequired) {
+      throw new Error('File upload is mandatory for department officers when completing steps. Please upload at least one document.');
+    }
     // If Supabase is not available, update mock data
     if (!isSupabaseAvailable()) {
       const ticket = mockTickets.find(t => t.id === ticketId);
@@ -688,6 +696,22 @@ export class TicketService {
           const oldStep = { ...ticket.steps[stepIndex] };
           ticket.steps[stepIndex] = { ...ticket.steps[stepIndex], ...updates };
           
+          // Handle file attachments for mock data
+          if (updates.attachments && updates.attachments.length > 0) {
+            ticket.steps[stepIndex].attachments = [
+              ...(ticket.steps[stepIndex].attachments || []),
+              ...updates.attachments.map((file: any) => ({
+                id: generateUUID(),
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type,
+                url: file.url || URL.createObjectURL(file),
+                uploadedBy: userId,
+                uploadedAt: new Date()
+              }))
+            ];
+          }
+          
           // Add audit entry for step update
           const auditEntry = {
             id: `AUDIT-${ticketId}-${ticket.auditTrail.length + 1}`,
@@ -696,7 +720,7 @@ export class TicketService {
             action: 'STEP_UPDATED',
             oldValue: `${oldStep.title} (${oldStep.status})`,
             newValue: `${ticket.steps[stepIndex].title} (${ticket.steps[stepIndex].status})`,
-            remarks: `Updated step "${ticket.steps[stepIndex].title}"`,
+            remarks: `Updated step "${ticket.steps[stepIndex].title}"${updates.attachments ? ` (${updates.attachments.length} files uploaded)` : ''}`,
             timestamp: new Date()
           };
           ticket.auditTrail.push(auditEntry);
@@ -730,6 +754,26 @@ export class TicketService {
       if (updates.mandatory_documents !== undefined) updateData.mandatory_documents = updates.mandatory_documents;
       if (updates.optional_documents !== undefined) updateData.optional_documents = updates.optional_documents;
 
+      // Handle file attachments in database
+      if (updates.attachments && updates.attachments.length > 0) {
+        // Store file information in step data
+        const currentData = currentStep?.data || {};
+        const existingAttachments = currentData.attachments || [];
+        const newAttachments = updates.attachments.map((file: any) => ({
+          id: generateUUID(),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: file.url || '',
+          uploadedBy: userId,
+          uploadedAt: new Date().toISOString()
+        }));
+        
+        updateData.data = {
+          ...currentData,
+          attachments: [...existingAttachments, ...newAttachments]
+        };
+      }
       const { error } = await supabase
         ?.from('steps')
         .update(updateData)
@@ -746,13 +790,15 @@ export class TicketService {
         return `${key}: ${oldValue} → ${newValue}`;
       }).join(', ');
       
+      const attachmentInfo = updates.attachments ? ` (${updates.attachments.length} files uploaded)` : '';
+      
       await this.createAuditEntry(
         ticketId,
         userId,
         'STEP_UPDATED',
         JSON.stringify(currentStep),
         JSON.stringify(updates),
-        `Updated step "${currentStep?.title}": ${changeDetails}`
+        `Updated step "${currentStep?.title}": ${changeDetails}${attachmentInfo}`
       );
     } catch (error) {
       handleSupabaseError(error);
