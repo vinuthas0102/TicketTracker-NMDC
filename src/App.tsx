@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Grid3X3, List, LayoutGrid } from 'lucide-react';
+import { Plus, Grid3x3 as Grid3X3, List, LayoutGrid } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TicketProvider, useTickets } from './context/TicketContext';
 import { FileProvider } from './context/FileContext';
