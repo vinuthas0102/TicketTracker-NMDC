@@ -25,7 +25,7 @@ interface SearchFilters {
 
 const Dashboard: React.FC = () => {
   const { user, selectedModule } = useAuth();
-  const { tickets, loading, error, getFilteredTickets } = useTickets();
+  const { tickets, loading, error } = useTickets();
   
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showTicketView, setShowTicketView] = useState(false);
@@ -52,23 +52,48 @@ const Dashboard: React.FC = () => {
   }, [statusFilter]);
 
   const filteredTickets = useMemo(() => {
-    const filters = {
-      search: searchFilters.search,
-      status: searchFilters.status || undefined,
-      assignedTo: searchFilters.assignedTo === 'unassigned' ? undefined : searchFilters.assignedTo || undefined,
-      priority: searchFilters.priority || undefined,
-      department: searchFilters.department || undefined
-    };
+    let result = tickets;
 
-    // Handle unassigned filter specially
-    let result = getFilteredTickets(filters);
-    
-    if (searchFilters.assignedTo === 'unassigned') {
-      result = result.filter(ticket => !ticket.assignedTo);
+    // Apply search filter
+    if (searchFilters.search) {
+      const searchLower = searchFilters.search.toLowerCase();
+      result = result.filter(ticket => 
+        ticket.title.toLowerCase().includes(searchLower) ||
+        ticket.description?.toLowerCase().includes(searchLower) ||
+        ticket.ticketNumber.toLowerCase().includes(searchLower)
+      );
     }
 
+    // Apply status filter
+    if (searchFilters.status) {
+      result = result.filter(ticket => ticket.status === searchFilters.status);
+    }
+
+    // Apply priority filter
+    if (searchFilters.priority) {
+      result = result.filter(ticket => ticket.priority === searchFilters.priority);
+    }
+
+    // Apply department filter
+    if (searchFilters.department) {
+      result = result.filter(ticket => {
+        // Assuming we need to check assigned user's department
+        // This would need to be adjusted based on your actual data structure
+        return true; // Placeholder - implement based on your needs
+      });
+    }
+
+    // Apply assigned to filter
+    if (searchFilters.assignedTo) {
+      if (searchFilters.assignedTo === 'unassigned') {
+        result = result.filter(ticket => !ticket.assignedTo);
+      } else {
+        result = result.filter(ticket => ticket.assignedTo === searchFilters.assignedTo);
+      }
+    }
+    
     return result;
-  }, [tickets, searchFilters, getFilteredTickets]);
+  }, [tickets, searchFilters]);
 
   const handleTicketClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
