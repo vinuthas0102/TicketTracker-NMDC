@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Ticket, TicketStatus, StatusTransitionRequest, User, Module } from '../types';
 import { TicketService } from '../services/ticketService';
+import { AuthService } from '../services/authService';
 import { useAuth } from './AuthContext';
 
 interface TicketContextType {
   tickets: Ticket[];
+  users: User[];
   loading: boolean;
   error: string | null;
   selectedTicket: Ticket | null;
@@ -27,10 +29,25 @@ interface TicketProviderProps {
 
 export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const { user } = useAuth();
+
+  // Fetch users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const allUsers = await AuthService.getAllUsers();
+        setUsers(allUsers);
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+      }
+    };
+    
+    fetchUsers();
+  }, []);
 
   const fetchTickets = async (moduleId: string) => {
     setLoading(true);
@@ -234,6 +251,7 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
 
   const value: TicketContextType = {
     tickets,
+    users,
     loading,
     error,
     selectedTicket,
