@@ -196,12 +196,11 @@ export class TicketService {
   private static getTicketPrefix(moduleId: string): string {
     // Module-specific ticket prefixes
     const modulePrefixes: Record<string, string> = {
-      '550e8400-e29b-41d4-a716-446655440101': 'MTKT', // Maintenance Module
-      '550e8400-e29b-41d4-a716-446655440102': 'MTKT', // Maintenance Tracker
-      '550e8400-e29b-41d4-a716-446655440103': 'CTKT', // Complaints Tracker
-      '550e8400-e29b-41d4-a716-446655440104': 'GTKT', // Grievances Module
-      '550e8400-e29b-41d4-a716-446655440105': 'RTKT', // RTI Tracker
-      '550e8400-e29b-41d4-a716-446655440106': 'PTKT'  // Project Execution Plan (PEP)
+      '550e8400-e29b-41d4-a716-446655440001': 'MTKT', // Maintenance Tracker
+      '550e8400-e29b-41d4-a716-446655440002': 'RTKT', // RTI Tracker
+      '550e8400-e29b-41d4-a716-446655440003': 'CTKT', // Complaints Tracker
+      '550e8400-e29b-41d4-a716-446655440004': 'GTKT', // Grievances Management
+      '550e8400-e29b-41d4-a716-446655440005': 'PTKT'  // Project Execution Platform
     };
     
     console.log('TicketService: Getting prefix for module ID:', moduleId, 'Prefix:', modulePrefixes[moduleId] || 'TKT');

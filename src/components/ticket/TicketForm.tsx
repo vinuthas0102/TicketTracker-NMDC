@@ -23,11 +23,11 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose, ticket }) => {
   // Get module-specific ticket prefix
   const getTicketPrefix = (moduleId: string): string => {
     const modulePrefixes: Record<string, string> = {
-      '550e8400-e29b-41d4-a716-446655440101': 'MTKT', // Maintenance Module
-      '550e8400-e29b-41d4-a716-446655440102': 'CTKT', // Complaints Tracker
-      '550e8400-e29b-41d4-a716-446655440103': 'GTKT', // Grievances Module
-      '550e8400-e29b-41d4-a716-446655440104': 'RTKT', // RTI Tracker
-      '550e8400-e29b-41d4-a716-446655440105': 'PTKT'  // Project Execution Plan (PEP)
+      '550e8400-e29b-41d4-a716-446655440001': 'MTKT', // Maintenance Tracker
+      '550e8400-e29b-41d4-a716-446655440002': 'RTKT', // RTI Tracker
+      '550e8400-e29b-41d4-a716-446655440003': 'CTKT', // Complaints Tracker
+      '550e8400-e29b-41d4-a716-446655440004': 'GTKT', // Grievances Management
+      '550e8400-e29b-41d4-a716-446655440005': 'PTKT'  // Project Execution Platform
     };
     return modulePrefixes[moduleId] || 'TKT';
   };
