@@ -7,6 +7,7 @@ import StatusTransitionModal from './StatusTransitionModal';
 import StepManagement from './StepManagement';
 import AuditTrail from './AuditTrail';
 import DocumentViewer from './DocumentViewer';
+import StepCompletionModal from './StepCompletionModal';
 
 interface TicketViewProps {
   ticket: Ticket;
@@ -17,10 +18,14 @@ interface TicketViewProps {
 
 const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDelete }) => {
   const { user } = useAuth();
-  const { users } = useTickets();
+  const { users, updateStep } = useTickets();
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [detailsCollapsed, setDetailsCollapsed] = useState(true);
   const [stepsCollapsed, setStepsCollapsed] = useState(true);
+  const [stepCompletionModal, setStepCompletionModal] = useState<{
+    isOpen: boolean;
+    step: any;
+  }>({ isOpen: false, step: null });
   const [viewingDocument, setViewingDocument] = useState<{
     id: string;
     name: string;
@@ -143,6 +148,35 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
   };
 
   const isOverdue = ticket.dueDate && new Date() > ticket.dueDate && ticket.status !== 'COMPLETED' && ticket.status !== 'CANCELLED';
+
+  const handleStepUpdate = async (stepId: string, updates: any) => {
+    // Check if this is a DO user trying to complete a step
+    if (user?.role === 'DO' && updates.status === 'COMPLETED') {
+      // Find the step being updated
+      const step = ticket.steps.find(s => s.id === stepId);
+      if (step) {
+        // Open the completion modal instead of direct update
+        setStepCompletionModal({ isOpen: true, step });
+        return;
+      }
+    }
+    
+    // For all other cases, proceed with direct update
+    try {
+      await updateStep(ticket.id, stepId, updates);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to update step');
+    }
+  };
+
+  const handleStepCompletion = async (stepId: string, updates: any) => {
+    try {
+      await updateStep(ticket.id, stepId, updates);
+      setStepCompletionModal({ isOpen: false, step: null });
+    } catch (error) {
+      throw error; // Let the modal handle the error display
+    }
+  };
 
   return (
     <>
@@ -386,6 +420,7 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
                           canManage={canEdit()} 
                           viewMode="inline"
                           onViewDocument={(file) => setViewingDocument(file)}
+                          onStepUpdate={handleStepUpdate}
                         />
                       </div>
                     )}
@@ -424,6 +459,15 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
         ticket={ticket}
         availableTransitions={getAvailableStatusTransitions()}
       />
+
+      {stepCompletionModal.isOpen && stepCompletionModal.step && (
+        <StepCompletionModal
+          isOpen={stepCompletionModal.isOpen}
+          onClose={() => setStepCompletionModal({ isOpen: false, step: null })}
+          step={stepCompletionModal.step}
+          onComplete={handleStepCompletion}
+        />
+      )}
     </>
   );
 };
