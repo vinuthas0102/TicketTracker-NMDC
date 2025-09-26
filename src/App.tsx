@@ -289,13 +289,20 @@ const App: React.FC = () => {
 const AppContent: React.FC = () => {
   const { isAuthenticated, isModuleSelected } = useAuth();
 
+  console.log('🔍 AppContent: isAuthenticated:', isAuthenticated);
+  console.log('🔍 AppContent: isModuleSelected:', isModuleSelected);
+
   if (!isAuthenticated) {
+    console.log('🔍 AppContent: Showing LoginForm');
     return <LoginForm />;
   }
 
   if (!isModuleSelected) {
+    console.log('🔍 AppContent: Showing ModuleSelection');
     return <ModuleSelection />;
   }
+  
+  console.log('🔍 AppContent: Showing Dashboard');
   return <Dashboard />;
 };
 
