@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Calendar, User, AlertTriangle, Clock, CheckCircle, XCircle, FileText, Users, Edit, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
-import { Ticket, User as UserType, TicketStep } from '../../types';
+import { ArrowLeft, Calendar, User, AlertTriangle, Clock, CheckCircle, XCircle, FileText, Users, CreditCard as Edit, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Ticket, User as UserType } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useTickets } from '../../context/TicketContext';
 import StatusTransitionModal from './StatusTransitionModal';
 import StepManagement from './StepManagement';
 import AuditTrail from './AuditTrail';
 import DocumentViewer from './DocumentViewer';
-import StepCompletionModal from './StepCompletionModal';
 
 interface TicketViewProps {
   ticket: Ticket;
@@ -18,7 +17,7 @@ interface TicketViewProps {
 
 const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDelete }) => {
   const { user } = useAuth();
-  const { users, updateStep } = useTickets();
+  const { users } = useTickets();
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [detailsCollapsed, setDetailsCollapsed] = useState(true);
   const [stepsCollapsed, setStepsCollapsed] = useState(true);
@@ -28,10 +27,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
     url: string;
     type: string;
   } | null>(null);
-  const [stepCompletionModal, setStepCompletionModal] = useState<{
-    isOpen: boolean;
-    step: TicketStep | null;
-  }>({ isOpen: false, step: null });
 
   const createdByUser = users.find(u => u.id === ticket.createdBy);
   const assignedToUser = ticket.assignedTo ? users.find(u => u.id === ticket.assignedTo) : undefined;
@@ -135,32 +130,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
     }
     
     return [];
-  };
-
-  const handleStepStatusChange = async (step: TicketStep, newStatus: string) => {
-    // If DO user is trying to complete a step, show the completion modal
-    if (user?.role === 'DO' && newStatus === 'COMPLETED') {
-      setStepCompletionModal({ isOpen: true, step });
-      return;
-    }
-    
-    // For other status changes, update directly
-    try {
-      await updateStep(ticket.id, step.id, { status: newStatus });
-    } catch (error) {
-      console.error('Failed to update step status:', error);
-      alert('Failed to update step status');
-    }
-  };
-
-  const handleStepCompletion = async (stepId: string, updates: any) => {
-    try {
-      await updateStep(ticket.id, stepId, updates);
-      setStepCompletionModal({ isOpen: false, step: null });
-    } catch (error) {
-      console.error('Failed to complete step:', error);
-      throw error; // Re-throw to let the modal handle the error
-    }
   };
 
   const completedSteps = ticket.steps.filter(step => step.status === 'COMPLETED').length;
@@ -417,7 +386,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
                           canManage={canEdit()} 
                           viewMode="inline"
                           onViewDocument={(file) => setViewingDocument(file)}
-                          onStepStatusChange={handleStepStatusChange}
                         />
                       </div>
                     )}
@@ -456,15 +424,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onClose, onEdit, onDele
         ticket={ticket}
         availableTransitions={getAvailableStatusTransitions()}
       />
-
-      {stepCompletionModal.step && (
-        <StepCompletionModal
-          isOpen={stepCompletionModal.isOpen}
-          onClose={() => setStepCompletionModal({ isOpen: false, step: null })}
-          step={stepCompletionModal.step}
-          onComplete={handleStepCompletion}
-        />
-      )}
     </>
   );
 };
