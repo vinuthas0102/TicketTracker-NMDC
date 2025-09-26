@@ -269,7 +269,14 @@ export class AuthService {
           icon: module.icon || 'FileText',
           color: module.color || 'from-blue-500 to-indigo-500',
           schema_id: module.schema_id,
-          config: module.config as { categories: string[] } || { categories: [] },
+          config: {
+            categories: (module.config && 
+                        typeof module.config === 'object' && 
+                        'categories' in module.config && 
+                        Array.isArray(module.config.categories)) 
+                       ? module.config.categories 
+                       : []
+          },
           active: module.active !== false,
           created_at: module.created_at ? new Date(module.created_at) : new Date(),
           updated_at: module.updated_at ? new Date(module.updated_at) : new Date()
