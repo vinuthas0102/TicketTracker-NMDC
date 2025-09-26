@@ -196,30 +196,18 @@ export class AuthService {
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440102',
-        name: 'Complaints Tracker',
-        description: 'Manage customer complaints and resolution workflows',
-        icon: 'Users',
-        color: 'from-orange-500 to-red-500',
-        schema_id: 'maintenance',
-        config: { categories: ['Service Quality', 'Staff Behavior', 'Facility Issues', 'Process Issues', 'Other'] },
-        active: true,
-        created_at: new Date(),
-        updated_at: new Date()
-      },
-      {
-        id: '550e8400-e29b-41d4-a716-446655440103',
         name: 'Grievances Management',
         description: 'Handle employee grievances and HR processes',
         icon: 'Users',
         color: 'from-purple-500 to-indigo-500',
-        schema_id: 'grievances',
+        schema_id: 'complaints',
         config: { categories: ['Workplace Issues', 'Policy Concerns', 'Discrimination', 'Safety Issues', 'Other'] },
         active: true,
         created_at: new Date(),
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440104',
+        id: '550e8400-e29b-41d4-a716-446655440103',
         name: 'RTI Tracker',
         description: 'Right to Information request tracking and management',
         icon: 'FileText',
@@ -238,18 +226,6 @@ export class AuthService {
         color: 'from-indigo-500 to-purple-500',
         schema_id: 'pep',
         config: { categories: ['Planning', 'Execution', 'Monitoring', 'Resource Management', 'Quality Control'] },
-        active: true,
-        created_at: new Date(),
-        updated_at: new Date()
-      },
-      {
-        id: '550e8400-e29b-41d4-a716-446655440107',
-        name: 'Advanced Maintenance Tracker',
-        description: 'Advanced maintenance tracking with workflow management and analytics',
-        icon: 'AlertTriangle',
-        color: 'from-emerald-500 to-teal-500',
-        schema_id: 'advanced_maintenance',
-        config: { categories: ['Preventive Maintenance', 'Emergency Repairs', 'Equipment Upgrades', 'Safety Inspections', 'Compliance Checks'] },
         active: true,
         created_at: new Date(),
         updated_at: new Date()
