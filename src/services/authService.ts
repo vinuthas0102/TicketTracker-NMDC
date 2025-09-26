@@ -317,7 +317,11 @@ export class AuthService {
               active: module.active
             });
 
-          if (insertError && insertError.code !== '23505') { // Ignore duplicate key errors
+          if (insertError) {
+            if (insertError.code === '23505') {
+              console.log('🔍 AuthService: Module already exists in database:', module.name);
+              return;
+            }
             console.error('🔍 AuthService: Failed to create module in database:', insertError);
           }
         }
