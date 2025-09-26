@@ -44,34 +44,41 @@ const ModuleSelection: React.FC = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">Select Module</h1>
           <p className="text-gray-600 text-lg">Choose the module you want to work with</p>
+          <p className="text-sm text-gray-500 mt-2">Available modules: {activeModules.length}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {activeModules.map((module) => (
             <div
               key={module.id}
               onClick={() => selectModule(module)}
               className={`
-                cursor-pointer rounded-2xl p-8 border-2 border-transparent
+                cursor-pointer rounded-2xl p-6 border-2 border-transparent
                 bg-gradient-to-br ${module.color}
-                hover:scale-110 transform transition-all duration-300
+                hover:scale-105 transform transition-all duration-300
                 hover:shadow-2xl text-white shadow-lg
-                hover:rotate-1 hover:-translate-y-2
+                hover:-translate-y-1 min-h-[280px] flex flex-col justify-between
               `}
             >
               <div className="text-center">
-                <div className="text-6xl mb-6 animate-bounce">
+                <div className="text-5xl mb-4">
                   {getIconComponent(module.icon)}
                 </div>
-                <h3 className="text-2xl font-bold mb-3">{module.name}</h3>
-                <p className="text-sm opacity-90 mb-6 leading-relaxed">{module.description}</p>
-                <div className="text-xs opacity-75 bg-white bg-opacity-20 rounded-full px-3 py-1 inline-block">
+                <h3 className="text-xl font-bold mb-3 leading-tight">{module.name}</h3>
+                <p className="text-sm opacity-90 mb-4 leading-relaxed">{module.description}</p>
+                <div className="text-xs opacity-75 bg-white bg-opacity-20 rounded-full px-3 py-1 inline-block mt-auto">
                   Categories: {module.config.categories.length}
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        {activeModules.length === 0 && (
+          <div className="text-center text-gray-600 mt-8">
+            <p>No modules available. Please contact your administrator.</p>
+          </div>
+        )}
 
         <div className="mt-10 text-center">
           <p className="text-gray-600">
