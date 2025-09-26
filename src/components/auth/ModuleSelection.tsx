@@ -22,7 +22,21 @@ const ModuleSelection: React.FC = () => {
   // Filter only active modules
   const activeModules = availableModules.filter(module => module.active !== false);
 
-  console.log('Active modules to display:', activeModules.length, activeModules.map(m => m.name));
+  console.log('ModuleSelection: Active modules to display:', activeModules.length, activeModules.map(m => ({ id: m.id, name: m.name })));
+  
+  if (activeModules.length === 0) {
+    console.warn('ModuleSelection: No active modules found!');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 flex items-center justify-center px-4">
+        <div className="max-w-6xl w-full bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-2xl p-10 border border-white border-opacity-20">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">No Modules Available</h1>
+            <p className="text-gray-600 text-lg">No active modules found. Please contact your administrator.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 flex items-center justify-center px-4">

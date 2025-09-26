@@ -196,22 +196,46 @@ export class AuthService {
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440102',
-        name: 'Grievances Management',
-        description: 'Handle employee grievances and HR processes',
-        icon: 'Users',
-        color: 'from-purple-500 to-indigo-500',
-        schema_id: 'complaints',
-        config: { categories: ['Workplace Issues', 'Policy Concerns', 'Discrimination', 'Safety Issues', 'Other'] },
+        name: 'Maintenance Tracker',
+        description: 'Track and manage maintenance requests and work orders',
+        icon: 'AlertTriangle',
+        color: 'from-red-500 to-pink-500',
+        schema_id: 'maintenance_tracker',
+        config: { categories: ['General Maintenance', 'HVAC', 'Equipment Repair'] },
         active: true,
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440103',
-        name: 'RTI Tracker',
-        description: 'Right to Information request tracking and management',
+        name: 'Complaints Tracker',
+        description: 'Manage customer complaints and resolution workflows',
+        icon: 'Users',
+        color: 'from-orange-500 to-red-500',
+        schema_id: 'complaints',
+        config: { categories: ['Service Quality', 'Staff Behavior', 'Product Issues', 'Billing', 'Other'] },
+        active: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        id: '550e8400-e29b-41d4-a716-446655440104',
+        name: 'Grievances Management',
+        description: 'Handle employee grievances and HR processes',
         icon: 'FileText',
         color: 'from-green-500 to-teal-500',
+        schema_id: 'grievances',
+        config: { categories: ['Workplace Issues', 'Policy Concerns', 'Discrimination', 'Safety Issues', 'Other'] },
+        active: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        id: '550e8400-e29b-41d4-a716-446655440105',
+        name: 'RTI Tracker',
+        description: 'Right to Information request tracking and management',
+        icon: 'Briefcase',
+        color: 'from-purple-500 to-indigo-500',
         schema_id: 'rti',
         config: { categories: ['Information Request', 'Appeal', 'Compliance', 'Documentation', 'Other'] },
         active: true,
@@ -219,7 +243,7 @@ export class AuthService {
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440105',
+        id: '550e8400-e29b-41d4-a716-446655440106',
         name: 'Project Execution Platform',
         description: 'Track project milestones and deliverables',
         icon: 'Briefcase',
@@ -232,8 +256,8 @@ export class AuthService {
       }
     ];
 
-    console.log('Loading modules - total mock modules:', mockModules.length);
-    console.log('Mock modules:', mockModules.map(m => ({ id: m.id, name: m.name })));
+    console.log('AuthService: Loading modules - total mock modules:', mockModules.length);
+    console.log('AuthService: Mock modules:', mockModules.map(m => ({ id: m.id, name: m.name, active: m.active })));
 
     // If Supabase is not available, return mock modules
     if (!isSupabaseAvailable()) {

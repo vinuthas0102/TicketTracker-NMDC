@@ -204,6 +204,7 @@ export class TicketService {
       '550e8400-e29b-41d4-a716-446655440106': 'PTKT'  // Project Execution Plan (PEP)
     };
     
+    console.log('TicketService: Getting prefix for module ID:', moduleId, 'Prefix:', modulePrefixes[moduleId] || 'TKT');
     return modulePrefixes[moduleId] || 'TKT';
   }
   private static async ensureUserExistsForTicketCreation(userId: string): Promise<void> {

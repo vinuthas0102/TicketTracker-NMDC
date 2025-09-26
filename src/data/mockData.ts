@@ -52,7 +52,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000001',
     ticketNumber: 'MTKT-001',
-    moduleId: '550e8400-e29b-41d4-a716-446655440101', // Maintenance Module
+    moduleId: '550e8400-e29b-41d4-a716-446655440101', // Maintenance Tracker
     title: 'System Login Issues',
     description: 'Multiple users unable to login to the main system. Error message appears after entering credentials.',
     status: 'ACTIVE',
@@ -132,7 +132,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000002',
     ticketNumber: 'MTKT-002',
-    moduleId: '550e8400-e29b-41d4-a716-446655440102', // Maintenance Tracker
+    moduleId: '550e8400-e29b-41d4-a716-446655440102', // Maintenance Tracker (Second)
     title: 'New Employee Onboarding Process',
     description: 'Setup access rights and accounts for new hire starting next week.',
     status: 'CREATED',
@@ -260,7 +260,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000004',
     ticketNumber: 'GTKT-001',
-    moduleId: '550e8400-e29b-41d4-a716-446655440104', // Grievances Module
+    moduleId: '550e8400-e29b-41d4-a716-446655440104', // Grievances Management
     title: 'Software License Renewal',
     description: 'Annual software license expires next month. Need to renew licenses for development tools.',
     status: 'DRAFT',
@@ -345,7 +345,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000006',
     ticketNumber: 'MTKT-003',
-    moduleId: '550e8400-e29b-41d4-a716-446655440102', // Maintenance Tracker
+    moduleId: '550e8400-e29b-41d4-a716-446655440101', // Maintenance Tracker (First)
     title: 'Air Conditioning Unit Repair',
     description: 'AC unit in conference room not cooling properly. Temperature control seems faulty.',
     status: 'CREATED',
@@ -431,7 +431,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000008',
     ticketNumber: 'GTKT-002',
-    moduleId: '550e8400-e29b-41d4-a716-446655440104', // Grievances Module
+    moduleId: '550e8400-e29b-41d4-a716-446655440104', // Grievances Management
     title: 'Poor Service Quality at Reception',
     description: 'Multiple customers complained about long wait times and unprofessional behavior at reception desk.',
     status: 'CREATED',
@@ -463,6 +463,45 @@ export const mockTickets: Ticket[] = [
         newValue: 'CREATED',
         remarks: 'Service quality complaint registered',
         timestamp: new Date('2024-12-28T16:35:00Z')
+      }
+    ]
+  },
+  // Additional tickets for Project Execution Platform
+  {
+    id: '20000000-0000-4000-8000-000000000009',
+    ticketNumber: 'PTKT-001',
+    moduleId: '550e8400-e29b-41d4-a716-446655440106', // Project Execution Platform
+    title: 'Project Planning Phase',
+    description: 'Initial project planning and resource allocation for new software development project.',
+    status: 'ACTIVE',
+    priority: 'HIGH',
+    category: 'Planning',
+    assignedTo: '550e8400-e29b-41d4-a716-446655440001',
+    createdBy: '550e8400-e29b-41d4-a716-446655440002',
+    createdAt: new Date('2024-12-28T17:00:00Z'),
+    updatedAt: new Date('2024-12-28T17:00:00Z'),
+    dueDate: new Date('2025-01-10T17:00:00Z'),
+    department: 'IT',
+    steps: [],
+    attachments: [],
+    auditTrail: [
+      {
+        id: '40000000-0000-4000-8000-000000000022',
+        ticketId: '20000000-0000-4000-8000-000000000009',
+        userId: '550e8400-e29b-41d4-a716-446655440002',
+        action: 'CREATED',
+        newValue: 'DRAFT',
+        timestamp: new Date('2024-12-28T17:00:00Z')
+      },
+      {
+        id: '40000000-0000-4000-8000-000000000023',
+        ticketId: '20000000-0000-4000-8000-000000000009',
+        userId: '550e8400-e29b-41d4-a716-446655440002',
+        action: 'STATUS_CHANGE',
+        oldValue: 'DRAFT',
+        newValue: 'ACTIVE',
+        remarks: 'Project planning initiated',
+        timestamp: new Date('2024-12-28T17:05:00Z')
       }
     ]
   }
