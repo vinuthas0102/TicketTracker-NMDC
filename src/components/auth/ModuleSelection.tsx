@@ -5,7 +5,14 @@ import { useAuth } from '../../context/AuthContext';
 const ModuleSelection: React.FC = () => {
   const { availableModules, selectModule } = useAuth();
 
-  console.log('ModuleSelection: Available modules:', availableModules.length, availableModules.map(m => ({ id: m.id, name: m.name, active: m.active })));
+  console.log('🔍 ModuleSelection: Available modules:', availableModules.length);
+  console.log('🔍 ModuleSelection: Module details:', availableModules.map(m => ({ 
+    id: m.id, 
+    name: m.name, 
+    active: m.active,
+    hasCategories: m.config?.categories?.length > 0,
+    validUUID: m.id && m.id.length === 36
+  })));
 
   const getIconComponent = (iconName: string) => {
     // Map icon names to actual Lucide icons
@@ -22,10 +29,11 @@ const ModuleSelection: React.FC = () => {
   // Filter only active modules
   const activeModules = availableModules.filter(module => module.active !== false);
 
-  console.log('ModuleSelection: Active modules to display:', activeModules.length, activeModules.map(m => ({ id: m.id, name: m.name })));
+  console.log('🔍 ModuleSelection: Active modules to display:', activeModules.length);
+  console.log('🔍 ModuleSelection: Active module names:', activeModules.map(m => m.name));
   
   if (activeModules.length === 0) {
-    console.warn('ModuleSelection: No active modules found!');
+    console.warn('🔍 ModuleSelection: No active modules found!');
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 flex items-center justify-center px-4">
         <div className="max-w-6xl w-full bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-2xl p-10 border border-white border-opacity-20">

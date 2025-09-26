@@ -183,7 +183,7 @@ export class AuthService {
     // Mock modules for demo mode
     const mockModules: Module[] = [
       {
-        id: '550e8400-e29b-41d4-a716-446655440101',
+        id: '550e8400-e29b-41d4-a716-446655440001',
         name: 'Maintenance Tracker',
         description: 'Track and manage maintenance requests and work orders',
         icon: 'Wrench',
@@ -195,7 +195,7 @@ export class AuthService {
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440102',
+        id: '550e8400-e29b-41d4-a716-446655440002',
         name: 'RTI Tracker',
         description: 'Right to Information request tracking and management',
         icon: 'FileText',
@@ -207,7 +207,7 @@ export class AuthService {
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440103',
+        id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Complaints Tracker',
         description: 'Manage customer complaints and resolution workflows',
         icon: 'Users',
@@ -219,7 +219,7 @@ export class AuthService {
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440104',
+        id: '550e8400-e29b-41d4-a716-446655440004',
         name: 'Grievances Management',
         description: 'Handle employee grievances and HR processes',
         icon: 'FileText',
@@ -231,7 +231,7 @@ export class AuthService {
         updated_at: new Date()
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440105',
+        id: '550e8400-e29b-41d4-a716-446655440005',
         name: 'Project Execution Platform',
         description: 'Track project milestones and deliverables',
         icon: 'Briefcase',
@@ -244,12 +244,18 @@ export class AuthService {
       }
     ];
 
-    console.log('AuthService: Loading modules - total mock modules:', mockModules.length);
-    console.log('AuthService: Mock modules:', mockModules.map(m => ({ id: m.id, name: m.name, active: m.active, categories: m.config.categories.length })));
+    console.log('🔍 AuthService: Loading modules - total mock modules:', mockModules.length);
+    console.log('🔍 AuthService: Mock modules details:', mockModules.map(m => ({ 
+      id: m.id, 
+      name: m.name, 
+      active: m.active, 
+      categories: m.config.categories.length,
+      validUUID: isValidUUID(m.id)
+    })));
 
     // If Supabase is not available, return mock modules
     if (!isSupabaseAvailable()) {
-      console.log('Supabase not available, returning mock modules');
+      console.log('🔍 Supabase not available, returning mock modules:', mockModules.length);
       return mockModules;
     }
 
@@ -261,7 +267,7 @@ export class AuthService {
         .order('name');
 
       if (error) {
-        console.warn('Supabase modules query failed, falling back to mock data:', error);
+        console.warn('🔍 Supabase modules query failed, falling back to mock data:', error);
         return mockModules;
       }
 
@@ -284,17 +290,19 @@ export class AuthService {
       }))
       .filter(module => {
         // Filter out modules with invalid UUID format
-        if (!isValidUUID(module.id)) {
-          console.warn(`Filtering out module with invalid UUID: ${module.id} (${module.name})`);
+        const isValid = isValidUUID(module.id);
+        if (!isValid) {
+          console.warn(`🔍 Filtering out module with invalid UUID: ${module.id} (${module.name})`);
           return false;
         }
         return true;
       });
 
-      console.log('Database modules loaded:', dbModules?.length || 0);
+      console.log('🔍 Database modules loaded:', dbModules?.length || 0);
+      console.log('🔍 Final modules being returned:', dbModules && dbModules.length > 0 ? dbModules.length : mockModules.length);
       return dbModules && dbModules.length > 0 ? dbModules : mockModules;
     } catch (error) {
-      console.warn('Supabase connection failed, using mock data:', error);
+      console.warn('🔍 Supabase connection failed, using mock data:', error);
       return mockModules; // Fallback to mock data on error
     }
   }
