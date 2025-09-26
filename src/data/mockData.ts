@@ -52,7 +52,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000001',
     ticketNumber: 'MTKT-001',
-    moduleId: '550e8400-e29b-41d4-a716-446655440101', // Maintenance Tracker
+    moduleId: '550e8400-e29b-41d4-a716-446655440001', // Maintenance Tracker
     title: 'System Login Issues',
     description: 'Multiple users unable to login to the main system. Error message appears after entering credentials.',
     status: 'ACTIVE',
@@ -170,7 +170,7 @@ export const mockTickets: Ticket[] = [
   {
     id: '20000000-0000-4000-8000-000000000003',
     ticketNumber: 'CTKT-001',
-    moduleId: '550e8400-e29b-41d4-a716-446655440103', // Complaints Tracker
+    moduleId: '550e8400-e29b-41d4-a716-446655440003', // Complaints Tracker
     title: 'Printer Maintenance Request',
     description: 'Office printer needs routine maintenance and toner replacement.',
     status: 'COMPLETED',
