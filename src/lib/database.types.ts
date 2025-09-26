@@ -44,6 +44,44 @@ export interface Database {
           updated_at?: string
         }
       }
+      modules: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          icon: string | null
+          color: string | null
+          schema_id: string
+          config: Json | null
+          active: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          icon?: string | null
+          color?: string | null
+          schema_id: string
+          config?: Json | null
+          active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          icon?: string | null
+          color?: string | null
+          schema_id?: string
+          config?: Json | null
+          active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       tickets: {
         Row: {
           id: string

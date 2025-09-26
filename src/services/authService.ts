@@ -180,7 +180,6 @@ export class AuthService {
   }
 
   static async getAvailableModules(): Promise<Module[]> {
-    // FORCE MOCK MODE - Always use mock modules for now
     const mockModules: Module[] = [
       {
         id: '550e8400-e29b-41d4-a716-446655440001',
@@ -244,24 +243,87 @@ export class AuthService {
       }
     ];
 
-    console.log('🔍 AuthService: FORCED MOCK MODE - Loading modules...');
-    console.log('🔍 AuthService: Total mock modules defined:', mockModules.length);
-    console.log('🔍 AuthService: Mock modules details:', mockModules.map(m => ({ 
-      id: m.id, 
-      name: m.name, 
-      active: m.active,
-      categories: m.config.categories.length,
-      validUUID: isValidUUID(m.id)
-    })));
+    // Try to fetch from Supabase first
+    if (isSupabaseAvailable()) {
+      try {
+        console.log('🔍 AuthService: Attempting to fetch modules from Supabase...');
+        
+        // First, ensure mock modules exist in database
+        await this.ensureModulesExistInDatabase(mockModules);
+        
+        const { data: modules, error } = await supabase
+          ?.from('modules')
+          .select('*')
+          .eq('active', true)
+          .order('name');
 
-    // Filter only active modules (all should be active)
-    const activeModules = mockModules.filter(module => module.active !== false);
-    console.log('🔍 AuthService: Active modules after filtering:', activeModules.length);
+        if (error) {
+          console.warn('🔍 AuthService: Supabase modules query failed, falling back to mock data:', error);
+          return mockModules.filter(module => module.active !== false);
+        }
 
-    // NO UUID VALIDATION FOR NOW - Return all active modules
-    console.log('🔍 AuthService: Final modules being returned:', activeModules.length);
-    console.log('🔍 AuthService: Module names:', activeModules.map(m => m.name));
-    
-    return activeModules;
+        const supabaseModules = modules?.map(module => ({
+          id: module.id,
+          name: module.name,
+          description: module.description || '',
+          icon: module.icon || 'FileText',
+          color: module.color || 'from-blue-500 to-indigo-500',
+          schema_id: module.schema_id,
+          config: module.config as { categories: string[] } || { categories: [] },
+          active: module.active !== false,
+          created_at: module.created_at ? new Date(module.created_at) : new Date(),
+          updated_at: module.updated_at ? new Date(module.updated_at) : new Date()
+        })) || [];
+        console.log('🔍 AuthService: Successfully loaded modules from Supabase:', supabaseModules.length);
+        return supabaseModules;
+      } catch (error) {
+        console.warn('🔍 AuthService: Supabase connection failed, using mock data:', error);
+      }
+    }
+
+    // Fallback to mock modules
+    console.log('🔍 AuthService: Using mock modules as fallback');
+    return mockModules.filter(module => module.active !== false);
+  }
+
+  private static async ensureModulesExistInDatabase(mockModules: Module[]): Promise<void> {
+    if (!isSupabaseAvailable()) {
+      return;
+    }
+
+    try {
+      for (const module of mockModules) {
+        // Check if module exists
+        const { data: existingModule, error: fetchError } = await supabase
+          ?.from('modules')
+          .select('id')
+          .eq('id', module.id)
+          .maybeSingle();
+
+        // If module doesn't exist, create it
+        if (fetchError?.code === 'PGRST116' || !existingModule) {
+          console.log('🔍 AuthService: Creating module in database:', module.name);
+          
+          const { error: insertError } = await supabase
+            ?.from('modules')
+            .insert({
+              id: module.id,
+              name: module.name,
+              description: module.description,
+              icon: module.icon,
+              color: module.color,
+              schema_id: module.schema_id,
+              config: module.config,
+              active: module.active
+            });
+
+          if (insertError && insertError.code !== '23505') { // Ignore duplicate key errors
+            console.error('🔍 AuthService: Failed to create module in database:', insertError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('🔍 AuthService: Error ensuring modules exist in database:', error);
+    }
   }
 }
