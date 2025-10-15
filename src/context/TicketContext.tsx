@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Ticket, TicketStatus, StatusTransitionRequest, User, Module } from '../types';
 import { TicketService } from '../services/ticketService';
 import { AuthService } from '../services/authService';
@@ -49,18 +49,21 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     fetchUsers();
   }, []);
 
-  const fetchTickets = async (moduleId: string) => {
+  const fetchTickets = useCallback(async (moduleId: string) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 TicketContext: Fetching tickets for module:', moduleId);
       const fetchedTickets = await TicketService.getTicketsByModule(moduleId);
+      console.log('🔍 TicketContext: Fetched tickets:', fetchedTickets.length);
       setTickets(fetchedTickets);
     } catch (err) {
+      console.error('🔍 TicketContext: Error fetching tickets:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch tickets');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const createTicket = async (ticketData: Omit<Ticket, 'id' | 'ticketNumber' | 'createdAt' | 'updatedAt' | 'steps' | 'attachments' | 'auditTrail'>): Promise<string> => {
     setError(null);

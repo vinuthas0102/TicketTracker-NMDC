@@ -16,10 +16,13 @@ export class TicketService {
 
     // If Supabase is not available, return mock tickets
     if (!isSupabaseAvailable()) {
+      console.log('🔍 TicketService: Supabase not available, returning mock tickets');
       return mockTickets.filter(ticket => ticket.moduleId === moduleId);
     }
 
     try {
+      console.log('🔍 TicketService: Fetching tickets from Supabase for module:', moduleId);
+
       const { data: tickets, error } = await supabase
         ?.from('tickets')
         .select(`
@@ -35,11 +38,28 @@ export class TicketService {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('🔍 TicketService: Supabase query error:', error);
         handleSupabaseError(error);
       }
 
-      return tickets?.map(ticket => this.mapTicketFromDatabase(ticket)) || [];
+      console.log('🔍 TicketService: Raw tickets from DB:', tickets?.length || 0);
+      if (tickets && tickets.length > 0) {
+        console.log('🔍 TicketService: First ticket sample:', {
+          id: tickets[0].id,
+          ticket_number: tickets[0].ticket_number,
+          title: tickets[0].title,
+          workflow_steps_count: tickets[0].workflow_steps?.length || 0,
+          documents_count: tickets[0].documents?.length || 0,
+          audit_logs_count: tickets[0].audit_logs?.length || 0
+        });
+      }
+
+      const mappedTickets = tickets?.map(ticket => this.mapTicketFromDatabase(ticket)) || [];
+      console.log('🔍 TicketService: Mapped tickets:', mappedTickets.length);
+
+      return mappedTickets;
     } catch (error) {
+      console.error('🔍 TicketService: Exception during fetch:', error);
       handleSupabaseError(error);
       return mockTickets.filter(ticket => ticket.moduleId === moduleId); // Fallback to mock data on error
     }
@@ -915,14 +935,16 @@ export class TicketService {
   }
 
   private static mapTicketFromDatabase(dbTicket: any): Ticket {
-    return {
+    console.log('🔍 TicketService: Mapping ticket:', dbTicket.id, dbTicket.ticket_number);
+
+    const ticket: Ticket = {
       id: dbTicket.id,
       ticketNumber: dbTicket.ticket_number,
       moduleId: dbTicket.module_id,
       title: dbTicket.title || '',
-      description: dbTicket.description,
-      status: dbTicket.status.toUpperCase(),
-      priority: dbTicket.priority.toUpperCase(),
+      description: dbTicket.description || '',
+      status: (dbTicket.status || 'draft').toUpperCase() as any,
+      priority: (dbTicket.priority || 'medium').toUpperCase() as any,
       category: dbTicket.data?.category || 'General',
       assignedTo: dbTicket.assigned_to || undefined,
       createdBy: dbTicket.created_by,
@@ -930,13 +952,20 @@ export class TicketService {
       dueDate: dbTicket.due_date ? new Date(dbTicket.due_date) : undefined,
       createdAt: new Date(dbTicket.created_at),
       updatedAt: new Date(dbTicket.updated_at),
-      steps: (dbTicket.workflow_steps || []).map((step: any) => ({
+      steps: [],
+      attachments: [],
+      auditTrail: []
+    };
+
+    // Map workflow steps
+    if (dbTicket.workflow_steps && Array.isArray(dbTicket.workflow_steps)) {
+      ticket.steps = dbTicket.workflow_steps.map((step: any) => ({
         id: step.id,
         ticketId: step.ticket_id,
         stepNumber: step.step_number,
         title: step.title,
         description: step.description || '',
-        status: step.status,
+        status: step.status || 'pending',
         assignedTo: step.assigned_to,
         createdBy: step.created_by,
         createdAt: new Date(step.created_at),
@@ -949,17 +978,27 @@ export class TicketService {
         documentRequirements: step.data?.documentRequirements || [],
         comments: [],
         attachments: []
-      })),
-      attachments: (dbTicket.documents || []).filter((doc: any) => doc.ticket_id).map((attachment: any) => ({
-        id: attachment.id,
-        fileName: attachment.name,
-        fileSize: attachment.size,
-        fileType: attachment.type,
-        url: attachment.url,
-        uploadedBy: attachment.uploaded_by,
-        uploadedAt: new Date(attachment.uploaded_at)
-      })),
-      auditTrail: (dbTicket.audit_logs || []).map((entry: any) => ({
+      }));
+    }
+
+    // Map documents/attachments
+    if (dbTicket.documents && Array.isArray(dbTicket.documents)) {
+      ticket.attachments = dbTicket.documents
+        .filter((doc: any) => doc.ticket_id && !doc.step_id)
+        .map((attachment: any) => ({
+          id: attachment.id,
+          fileName: attachment.name,
+          fileSize: attachment.size,
+          fileType: attachment.type,
+          url: attachment.url || '',
+          uploadedBy: attachment.uploaded_by,
+          uploadedAt: new Date(attachment.uploaded_at)
+        }));
+    }
+
+    // Map audit logs
+    if (dbTicket.audit_logs && Array.isArray(dbTicket.audit_logs)) {
+      ticket.auditTrail = dbTicket.audit_logs.map((entry: any) => ({
         id: entry.id,
         ticketId: entry.ticket_id,
         userId: entry.performed_by,
@@ -968,7 +1007,19 @@ export class TicketService {
         newValue: entry.new_data,
         remarks: entry.description,
         timestamp: new Date(entry.performed_at)
-      }))
-    };
+      }));
+    }
+
+    console.log('🔍 TicketService: Mapped ticket result:', {
+      id: ticket.id,
+      ticketNumber: ticket.ticketNumber,
+      title: ticket.title,
+      status: ticket.status,
+      stepsCount: ticket.steps.length,
+      attachmentsCount: ticket.attachments.length,
+      auditTrailCount: ticket.auditTrail.length
+    });
+
+    return ticket;
   }
 }

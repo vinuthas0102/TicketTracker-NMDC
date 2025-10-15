@@ -25,8 +25,8 @@ interface SearchFilters {
 
 const Dashboard: React.FC = () => {
   const { user, selectedModule } = useAuth();
-  const { tickets, loading, error } = useTickets();
-  
+  const { tickets, loading, error, fetchTickets } = useTickets();
+
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showTicketView, setShowTicketView] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<TicketStatus | null>(null);
   const [expandedTickets, setExpandedTickets] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
-  
+
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     search: '',
     status: '',
@@ -42,6 +42,14 @@ const Dashboard: React.FC = () => {
     priority: '',
     department: ''
   });
+
+  // Fetch tickets when module is selected
+  useEffect(() => {
+    if (selectedModule?.id) {
+      console.log('🔍 Dashboard: Fetching tickets for module:', selectedModule.id, selectedModule.name);
+      fetchTickets(selectedModule.id);
+    }
+  }, [selectedModule?.id, fetchTickets]);
 
   // Apply status filter to search filters when status card is clicked
   useEffect(() => {
