@@ -325,40 +325,57 @@ const StepManagement: React.FC<StepManagementProps> = ({
 
     try {
       const fileId = generateUUID();
-      const uploadedFile = {
-        id: fileId,
-        name: file.name,
-        url: '',
-        size: file.size,
-        type: file.type,
-        uploadedAt: new Date(),
-        fileData: file
-      };
 
-      // Store the file in the file context
-      const url = storeFile(fileId, file);
-      uploadedFile.url = url;
+      // Convert file to base64 for storage
+      const reader = new FileReader();
 
-      // Find the step
-      const step = ticket.steps.find(s => s.id === stepId);
-      if (!step) {
-        alert('Step not found');
-        return;
-      }
+      await new Promise<void>((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const base64Data = reader.result as string;
 
-      // Update the document requirements with the uploaded file
-      const updatedDocRequirements = (step.documentRequirements || []).map(req =>
-        req.id === requirementId
-          ? { ...req, userUploadedFile: uploadedFile }
-          : req
-      );
+            const uploadedFile = {
+              id: fileId,
+              name: file.name,
+              url: base64Data,
+              size: file.size,
+              type: file.type,
+              uploadedAt: new Date()
+            };
 
-      // Update the step in the database
-      await updateStep(ticket.id, stepId, {
-        documentRequirements: updatedDocRequirements
+            // Also store in file context for immediate access
+            storeFile(fileId, file);
+
+            // Find the step
+            const step = ticket.steps.find(s => s.id === stepId);
+            if (!step) {
+              alert('Step not found');
+              reject(new Error('Step not found'));
+              return;
+            }
+
+            // Update the document requirements with the uploaded file
+            const updatedDocRequirements = (step.documentRequirements || []).map(req =>
+              req.id === requirementId
+                ? { ...req, userUploadedFile: uploadedFile }
+                : req
+            );
+
+            // Update the step in the database
+            await updateStep(ticket.id, stepId, {
+              documentRequirements: updatedDocRequirements
+            });
+
+            alert('Document uploaded successfully!');
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
       });
-
-      alert('Document uploaded successfully!');
 
       // Reset input
       e.target.value = '';
