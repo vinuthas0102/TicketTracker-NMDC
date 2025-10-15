@@ -146,6 +146,7 @@ export interface Database {
           mandatory_documents: string[] | null
           optional_documents: string[] | null
           due_date: string | null
+          manager_due_date: string | null
           data: Json | null
           created_at: string
           updated_at: string
@@ -167,6 +168,7 @@ export interface Database {
           mandatory_documents?: string[] | null
           optional_documents?: string[] | null
           due_date?: string | null
+          manager_due_date?: string | null
           data?: Json | null
           created_at?: string
           updated_at?: string
@@ -188,6 +190,7 @@ export interface Database {
           mandatory_documents?: string[] | null
           optional_documents?: string[] | null
           due_date?: string | null
+          manager_due_date?: string | null
           data?: Json | null
           created_at?: string
           updated_at?: string

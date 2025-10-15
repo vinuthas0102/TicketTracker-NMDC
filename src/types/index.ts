@@ -59,6 +59,8 @@ export interface TicketStep {
   createdBy: string;
   createdAt: Date;
   completedAt?: Date;
+  dueDate?: Date;
+  managerDueDate?: Date;
   is_parallel?: boolean;
   dependencies?: string[];
   mandatory_documents?: string[];

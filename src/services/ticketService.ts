@@ -647,6 +647,8 @@ export class TicketService {
         description: stepData.description || null,
         status: stepData.status.toLowerCase(),
         assigned_to: stepData.assignedTo || null,
+        due_date: stepData.dueDate?.toISOString() || null,
+        manager_due_date: stepData.managerDueDate?.toISOString() || null,
         is_parallel: stepData.is_parallel !== false,
         dependencies: stepData.dependencies || [],
         mandatory_documents: stepData.mandatory_documents || [],
@@ -760,12 +762,14 @@ export class TicketService {
       }
 
       const updateData: any = {};
-      
+
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.status !== undefined) updateData.status = updates.status.toLowerCase();
       if (updates.assignedTo !== undefined) updateData.assigned_to = updates.assignedTo;
       if (updates.completedAt !== undefined) updateData.completed_at = updates.completedAt?.toISOString() || null;
+      if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate?.toISOString() || null;
+      if (updates.managerDueDate !== undefined) updateData.manager_due_date = updates.managerDueDate?.toISOString() || null;
       if (updates.stepNumber !== undefined) updateData.step_number = updates.stepNumber.toString();
       if (updates.is_parallel !== undefined) updateData.is_parallel = updates.is_parallel;
       if (updates.dependencies !== undefined) updateData.dependencies = updates.dependencies;
@@ -970,6 +974,8 @@ export class TicketService {
         createdBy: step.created_by,
         createdAt: new Date(step.created_at),
         completedAt: step.completed_at ? new Date(step.completed_at) : undefined,
+        dueDate: step.due_date ? new Date(step.due_date) : undefined,
+        managerDueDate: step.manager_due_date ? new Date(step.manager_due_date) : undefined,
         is_parallel: step.is_parallel !== false,
         dependencies: step.dependencies || [],
         mandatory_documents: step.mandatory_documents || [],

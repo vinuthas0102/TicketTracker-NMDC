@@ -46,6 +46,8 @@ const StepManagement: React.FC<StepManagementProps> = ({
     description: '',
     status: 'PENDING' as StepStatus,
     assignedTo: '',
+    dueDate: '',
+    managerDueDate: '',
     referenceFiles: [] as ReferenceFile[],
     documentRequirements: [] as DocumentRequirement[]
   });
@@ -84,6 +86,8 @@ const StepManagement: React.FC<StepManagementProps> = ({
       description: '',
       status: 'PENDING',
       assignedTo: '',
+      dueDate: '',
+      managerDueDate: '',
       referenceFiles: [],
       documentRequirements: []
     });
@@ -112,6 +116,8 @@ const StepManagement: React.FC<StepManagementProps> = ({
       description: step.description || '',
       status: step.status,
       assignedTo: step.assignedTo || '',
+      dueDate: step.dueDate ? new Date(step.dueDate).toISOString().split('T')[0] : '',
+      managerDueDate: step.managerDueDate ? new Date(step.managerDueDate).toISOString().split('T')[0] : '',
       referenceFiles: step.referenceFiles || [],
       documentRequirements: step.documentRequirements || []
     });
@@ -163,6 +169,8 @@ const StepManagement: React.FC<StepManagementProps> = ({
         description: formData.description,
         status: formData.status,
         assignedTo: formData.assignedTo || undefined,
+        dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
+        managerDueDate: formData.managerDueDate ? new Date(formData.managerDueDate) : undefined,
         createdBy: user.id,
         referenceFiles: processedReferenceFiles,
         documentRequirements: processedDocumentRequirements
@@ -211,12 +219,24 @@ const StepManagement: React.FC<StepManagementProps> = ({
 
   const handleStepStatusSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!changingStatusStep || !user) return;
-    
+
     if (stepStatusRemarks.trim().length < 5) {
       alert('Please provide remarks (minimum 5 characters)');
       return;
+    }
+
+    // Validate mandatory documents if DO user is completing the step
+    if (user.role === 'DO' && newStepStatus === 'COMPLETED' && changingStatusStep.documentRequirements) {
+      const mandatoryDocs = changingStatusStep.documentRequirements.filter(req => req.type === 'mandatory');
+      const missingDocs = mandatoryDocs.filter(req => !req.userUploadedFile);
+
+      if (missingDocs.length > 0) {
+        const missingDocNames = missingDocs.map(doc => doc.name).join(', ');
+        alert(`Cannot complete step. The following mandatory documents must be uploaded first: ${missingDocNames}`);
+        return;
+      }
     }
 
     try {
@@ -224,7 +244,7 @@ const StepManagement: React.FC<StepManagementProps> = ({
         status: newStepStatus,
         completedAt: newStepStatus === 'COMPLETED' ? new Date() : undefined
       });
-      
+
       setChangingStatusStep(null);
       setStepStatusRemarks('');
       alert('Step status updated successfully!');
@@ -561,6 +581,26 @@ const StepManagement: React.FC<StepManagementProps> = ({
                 </div>
               )}
 
+              {/* Due Date Display - Role-based visibility */}
+              {(step.dueDate || step.managerDueDate) && (
+                <div className="mb-3 space-y-1">
+                  {/* Show user due date only to EO and EMPLOYEE users, hide from DO */}
+                  {step.dueDate && user?.role !== 'DO' && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Clock className="w-4 h-4 text-blue-500" />
+                      <span>User Due: {new Date(step.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  {/* Show manager due date to DO and EO users */}
+                  {step.managerDueDate && (user?.role === 'DO' || user?.role === 'EO') && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                      <span>Manager Due: {new Date(step.managerDueDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Reference Files Section */}
               {step.referenceFiles && step.referenceFiles.length > 0 && (
                 <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
@@ -610,13 +650,19 @@ const StepManagement: React.FC<StepManagementProps> = ({
                     {step.documentRequirements.map((req) => (
                       <div key={req.id} className="bg-white p-2 rounded border border-blue-200">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900">{req.name}</span>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            req.type === 'mandatory' 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                          <div className="flex items-center space-x-2">
+                            {req.type === 'mandatory' && (
+                              <AlertTriangle className="w-4 h-4 text-red-600" />
+                            )}
+                            <span className="text-sm font-medium text-gray-900">{req.name}</span>
+                          </div>
+                          <span className={`px-2 py-1 text-xs font-bold rounded-full flex items-center space-x-1 ${
+                            req.type === 'mandatory'
+                              ? 'bg-red-100 text-red-800 border border-red-300'
+                              : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
                           }`}>
-                            {req.type}
+                            {req.type === 'mandatory' && <span>⚠</span>}
+                            <span>{req.type.toUpperCase()}</span>
                           </span>
                         </div>
                         {req.description && (
@@ -778,6 +824,36 @@ const StepManagement: React.FC<StepManagementProps> = ({
                         <option key={user.id} value={user.id}>{user.name}</option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* Due Dates Section */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        User Due Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.dueDate}
+                        onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Internal deadline (hidden from DO users)</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Manager Due Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.managerDueDate}
+                        onChange={(e) => setFormData({ ...formData, managerDueDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Deadline visible to DO users</p>
+                    </div>
                   </div>
 
                   {/* Reference Files Section */}
@@ -961,6 +1037,32 @@ const StepManagement: React.FC<StepManagementProps> = ({
                           {users.find(u => u.id === viewingStep.assignedTo)?.name || 'Unknown User'}
                         </span>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Due Dates - Role-based visibility */}
+                  {(viewingStep.dueDate || viewingStep.managerDueDate) && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {viewingStep.dueDate && user?.role !== 'DO' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">User Due Date</label>
+                          <div className="text-sm text-gray-600">
+                            {new Intl.DateTimeFormat('en-US', {
+                              dateStyle: 'medium'
+                            }).format(new Date(viewingStep.dueDate))}
+                          </div>
+                        </div>
+                      )}
+                      {viewingStep.managerDueDate && (user?.role === 'DO' || user?.role === 'EO') && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Manager Due Date</label>
+                          <div className="text-sm text-gray-600">
+                            {new Intl.DateTimeFormat('en-US', {
+                              dateStyle: 'medium'
+                            }).format(new Date(viewingStep.managerDueDate))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -28,16 +28,30 @@ const StepCompletionModal: React.FC<StepCompletionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (remarks.trim().length < 10) {
       alert('Please provide remarks (minimum 10 characters)');
       return;
     }
 
-    // Check file upload requirement for DO users
-    if (isFileUploadRequired && (!uploadedFiles || uploadedFiles.length === 0)) {
-      alert('File upload is mandatory for department officers when completing steps. Please upload at least one document.');
-      return;
+    // Check if all mandatory document requirements are uploaded
+    if (user?.role === 'DO' && step.documentRequirements) {
+      const mandatoryDocs = step.documentRequirements.filter(req => req.type === 'mandatory');
+      const missingDocs = mandatoryDocs.filter(req => !req.userUploadedFile);
+
+      if (missingDocs.length > 0) {
+        const missingDocNames = missingDocs.map(doc => doc.name).join(', ');
+        alert(`Cannot complete step. The following mandatory documents must be uploaded: ${missingDocNames}`);
+        return;
+      }
+    }
+
+    // Check file upload requirement for DO users (if no document requirements defined)
+    if (isFileUploadRequired && (!step.documentRequirements || step.documentRequirements.length === 0)) {
+      if (!uploadedFiles || uploadedFiles.length === 0) {
+        alert('File upload is mandatory for department officers when completing steps. Please upload at least one document.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -51,11 +65,11 @@ const StepCompletionModal: React.FC<StepCompletionModalProps> = ({
       };
 
       await onComplete(step.id, updates);
-      
+
       // Reset form
       setRemarks('');
       setUploadedFiles(null);
-      
+
       onClose();
     } catch (error) {
       console.error('Step completion error:', error);
@@ -97,6 +111,37 @@ const StepCompletionModal: React.FC<StepCompletionModalProps> = ({
               <p className="text-sm text-gray-600 mb-4">
                 Current Status: <span className="font-bold text-orange-600">{step.status}</span>
               </p>
+
+              {/* Show mandatory document requirements status */}
+              {user?.role === 'DO' && step.documentRequirements && step.documentRequirements.length > 0 && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm font-medium text-yellow-800 mb-2">Document Requirements:</p>
+                  <ul className="space-y-1">
+                    {step.documentRequirements
+                      .filter(req => req.type === 'mandatory')
+                      .map(req => (
+                        <li key={req.id} className="flex items-center space-x-2 text-sm">
+                          {req.userUploadedFile ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                              <span className="text-green-700">{req.name} - Uploaded</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                              <span className="text-red-700">{req.name} - <strong>Required</strong></span>
+                            </>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                  {step.documentRequirements.filter(req => req.type === 'mandatory' && !req.userUploadedFile).length > 0 && (
+                    <p className="text-xs text-red-600 mt-2">
+                      All mandatory documents must be uploaded before completing this step.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* File Upload Section - Mandatory for DO users */}
