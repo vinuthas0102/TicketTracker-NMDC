@@ -776,6 +776,25 @@ export class TicketService {
       if (updates.mandatory_documents !== undefined) updateData.mandatory_documents = updates.mandatory_documents;
       if (updates.optional_documents !== undefined) updateData.optional_documents = updates.optional_documents;
 
+      // Handle document requirements updates
+      if (updates.documentRequirements !== undefined) {
+        const currentData = currentStep?.data || {};
+        updateData.data = {
+          ...currentData,
+          documentRequirements: updates.documentRequirements
+        };
+      }
+
+      // Handle reference files updates
+      if (updates.referenceFiles !== undefined) {
+        const currentData = currentStep?.data || {};
+        updateData.data = {
+          ...currentData,
+          referenceFiles: updates.referenceFiles,
+          ...(updateData.data || {})
+        };
+      }
+
       // Handle file attachments in database
       if (updates.attachments && updates.attachments.length > 0) {
         // Store file information in step data
@@ -790,9 +809,10 @@ export class TicketService {
           uploadedBy: userId,
           uploadedAt: new Date().toISOString()
         }));
-        
+
         updateData.data = {
           ...currentData,
+          ...(updateData.data || {}),
           attachments: [...existingAttachments, ...newAttachments]
         };
       }

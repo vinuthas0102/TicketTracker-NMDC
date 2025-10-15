@@ -312,6 +312,55 @@ const StepManagement: React.FC<StepManagementProps> = ({
     e.target.value = '';
   };
 
+  const handleExistingStepDocumentUpload = async (stepId: string, requirementId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      const fileId = generateUUID();
+      const uploadedFile = {
+        id: fileId,
+        name: file.name,
+        url: '',
+        size: file.size,
+        type: file.type,
+        uploadedAt: new Date(),
+        fileData: file
+      };
+
+      // Store the file in the file context
+      const url = storeFile(fileId, file);
+      uploadedFile.url = url;
+
+      // Find the step
+      const step = ticket.steps.find(s => s.id === stepId);
+      if (!step) {
+        alert('Step not found');
+        return;
+      }
+
+      // Update the document requirements with the uploaded file
+      const updatedDocRequirements = (step.documentRequirements || []).map(req =>
+        req.id === requirementId
+          ? { ...req, userUploadedFile: uploadedFile }
+          : req
+      );
+
+      // Update the step in the database
+      await updateStep(ticket.id, stepId, {
+        documentRequirements: updatedDocRequirements
+      });
+
+      alert('Document uploaded successfully!');
+
+      // Reset input
+      e.target.value = '';
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document. Please try again.');
+    }
+  };
+
   const addDocumentRequirement = () => {
     const newRequirement: DocumentRequirement = {
       id: generateUUID(),
@@ -706,7 +755,7 @@ const StepManagement: React.FC<StepManagementProps> = ({
                               <div className="mt-2">
                                 <input
                                   type="file"
-                                  onChange={(e) => handleDocumentRequirementUpload(req.id, e)}
+                                  onChange={(e) => handleExistingStepDocumentUpload(step.id, req.id, e)}
                                   className="text-xs w-full"
                                   accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.xlsx,.xls"
                                 />
