@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Clock, CheckCircle, User, FileText, Upload, Eye, Download, X, MoreVertical, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Clock, CheckCircle, User, FileText, Upload, Eye, Download, X, MoreVertical, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Ticket, TicketStep, StepStatus, ReferenceFile, DocumentRequirement } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useTickets } from '../../context/TicketContext';
