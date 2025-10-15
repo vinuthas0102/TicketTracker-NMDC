@@ -955,7 +955,7 @@ export class TicketService {
         fileName: attachment.name,
         fileSize: attachment.size,
         fileType: attachment.type,
-        url: attachment.file_url,
+        url: attachment.url,
         uploadedBy: attachment.uploaded_by,
         uploadedAt: new Date(attachment.uploaded_at)
       })),
