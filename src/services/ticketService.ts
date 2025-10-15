@@ -24,7 +24,7 @@ export class TicketService {
         ?.from('tickets')
         .select(`
           *,
-          steps (
+          workflow_steps (
             *,
             documents (*)
           ),
@@ -638,7 +638,7 @@ export class TicketService {
       };
 
       const { data: insertedStep, error } = await supabase
-        ?.from('steps')
+        ?.from('workflow_steps')
         .insert(stepInsertData)
         .select()
         .single();
@@ -662,8 +662,6 @@ export class TicketService {
     }
   }
 
-  static async updateStep(ticketId: string, stepId: string, updates: any): Promise<void> {
-  }
   static async updateStep(ticketId: string, stepId: string, updates: any, userId: string): Promise<void> {
     // Validate UUIDs
     try {
@@ -732,7 +730,7 @@ export class TicketService {
     try {
       // Get current step data for audit trail
       const { data: currentStep, error: fetchError } = await supabase
-        ?.from('steps')
+        ?.from('workflow_steps')
         .select('*')
         .eq('id', stepId)
         .single();
@@ -775,7 +773,7 @@ export class TicketService {
         };
       }
       const { error } = await supabase
-        ?.from('steps')
+        ?.from('workflow_steps')
         .update(updateData)
         .eq('id', stepId);
 
@@ -833,7 +831,7 @@ export class TicketService {
     try {
       // Get step data for audit trail before deletion
       const { data: stepToDelete, error: fetchError } = await supabase
-        ?.from('steps')
+        ?.from('workflow_steps')
         .select('*')
         .eq('id', stepId)
         .single();
@@ -855,7 +853,7 @@ export class TicketService {
       }
 
       const { error } = await supabase
-        ?.from('steps')
+        ?.from('workflow_steps')
         .delete()
         .eq('id', stepId);
 
@@ -932,7 +930,7 @@ export class TicketService {
       dueDate: dbTicket.due_date ? new Date(dbTicket.due_date) : undefined,
       createdAt: new Date(dbTicket.created_at),
       updatedAt: new Date(dbTicket.updated_at),
-      steps: (dbTicket.steps || []).map((step: any) => ({
+      steps: (dbTicket.workflow_steps || []).map((step: any) => ({
         id: step.id,
         ticketId: step.ticket_id,
         stepNumber: step.step_number,
