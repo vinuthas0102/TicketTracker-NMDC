@@ -126,41 +126,63 @@ const StepManagement: React.FC<StepManagementProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
 
     try {
-      // Process uploaded files and create blob URLs
-      const processedReferenceFiles = formData.referenceFiles.map(file => {
-        const uploadedFile = uploadedFiles.get(file.id);
-        if (uploadedFile) {
-          const url = storeFile(file.id, uploadedFile);
-          return {
-            ...file,
-            url,
-            fileData: uploadedFile
-          };
-        }
-        return file;
-      });
-
-      const processedDocumentRequirements = formData.documentRequirements.map(req => {
-        if (req.userUploadedFile) {
-          const uploadedFile = uploadedFiles.get(req.userUploadedFile.id);
+      // Process uploaded files and convert to base64
+      const processedReferenceFiles = await Promise.all(
+        formData.referenceFiles.map(async (file) => {
+          const uploadedFile = uploadedFiles.get(file.id);
           if (uploadedFile) {
-            const url = storeFile(req.userUploadedFile.id, uploadedFile);
+            // Store in file context for immediate access
+            storeFile(file.id, uploadedFile);
+
+            // Convert to base64 for database storage
+            const base64Data = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = () => reject(reader.error);
+              reader.readAsDataURL(uploadedFile);
+            });
+
             return {
-              ...req,
-              userUploadedFile: {
-                ...req.userUploadedFile,
-                url,
-                fileData: uploadedFile
-              }
+              ...file,
+              url: base64Data
             };
           }
-        }
-        return req;
-      });
+          return file;
+        })
+      );
+
+      const processedDocumentRequirements = await Promise.all(
+        formData.documentRequirements.map(async (req) => {
+          if (req.userUploadedFile) {
+            const uploadedFile = uploadedFiles.get(req.userUploadedFile.id);
+            if (uploadedFile) {
+              // Store in file context for immediate access
+              storeFile(req.userUploadedFile.id, uploadedFile);
+
+              // Convert to base64 for database storage
+              const base64Data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(uploadedFile);
+              });
+
+              return {
+                ...req,
+                userUploadedFile: {
+                  ...req.userUploadedFile,
+                  url: base64Data
+                }
+              };
+            }
+          }
+          return req;
+        })
+      );
 
       const stepData = {
         ticketId: ticket.id,

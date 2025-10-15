@@ -74,24 +74,36 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, onClose }) => {
   const renderContent = () => {
     if (isImage) {
       if (imageError) {
+        const isBlobUrl = file.url?.startsWith('blob:');
         return (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-4">
+          <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-4 p-6">
             <AlertCircle className="w-16 h-16 text-red-400" />
-            <div className="text-center">
-              <p className="text-lg font-medium mb-2">Failed to load image</p>
-              <p className="text-sm text-gray-400 mb-4">File: {file.name}</p>
-              <p className="text-xs text-gray-400 mb-4">URL: {file.url?.substring(0, 50)}...</p>
-              <button
-                onClick={retryImageLoad}
-                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Retry</span>
-              </button>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 truncate">{file.name}</h3>
-                <p className="text-xs text-gray-500">Type: {file.type} | Size: {(file.url.length / 1024).toFixed(1)}KB</p>
-              </div>
+            <div className="text-center max-w-md">
+              <p className="text-lg font-medium mb-2 text-gray-800">Failed to load image</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">{file.name}</p>
+              <p className="text-xs text-gray-500 mb-2">Type: {file.type}</p>
+
+              {isBlobUrl ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                  <p className="text-sm text-yellow-800 mb-2">
+                    <strong>This file was uploaded with an old format and is no longer accessible.</strong>
+                  </p>
+                  <p className="text-xs text-yellow-700">
+                    Please re-upload this file to view it. The new upload will be stored permanently.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-gray-400 mb-4 break-all">URL: {file.url?.substring(0, 50)}...</p>
+                  <button
+                    onClick={retryImageLoad}
+                    className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 mx-auto"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Retry</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         );
