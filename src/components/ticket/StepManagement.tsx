@@ -604,9 +604,31 @@ const StepManagement: React.FC<StepManagementProps> = ({
 
       {/* Steps List */}
       <div className="space-y-4">
-        {ticket.steps.map((step, index) => {
+        {ticket.steps
+          .slice()
+          .sort((a, b) => {
+            const statusOrder: Record<string, number> = {
+              'Not Started': 1,
+              'In Progress': 2,
+              'Pending Review': 3,
+              'Approved': 4,
+              'Rejected': 5,
+              'On Hold': 6,
+              'Completed': 7
+            };
+
+            const orderA = statusOrder[a.status] || 99;
+            const orderB = statusOrder[b.status] || 99;
+
+            if (orderA !== orderB) {
+              return orderA - orderB;
+            }
+
+            return parseInt(a.stepNumber) - parseInt(b.stepNumber);
+          })
+          .map((step, index) => {
           const assignedUser = step.assignedTo ? users.find(u => u.id === step.assignedTo) : null;
-          
+
           return (
             <div key={step.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <div className="flex justify-between items-start mb-3">
