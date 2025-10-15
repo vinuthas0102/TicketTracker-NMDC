@@ -227,9 +227,16 @@ const StepManagement: React.FC<StepManagementProps> = ({
       return;
     }
 
+    // Get the latest step data from ticket.steps to ensure we have updated document requirements
+    const currentStep = ticket.steps.find(s => s.id === changingStatusStep.id);
+    if (!currentStep) {
+      alert('Step not found');
+      return;
+    }
+
     // Validate mandatory documents if DO user is completing the step
-    if (user.role === 'DO' && newStepStatus === 'COMPLETED' && changingStatusStep.documentRequirements) {
-      const mandatoryDocs = changingStatusStep.documentRequirements.filter(req => req.type === 'mandatory');
+    if (user.role === 'DO' && newStepStatus === 'COMPLETED' && currentStep.documentRequirements) {
+      const mandatoryDocs = currentStep.documentRequirements.filter(req => req.type === 'mandatory');
       const missingDocs = mandatoryDocs.filter(req => !req.userUploadedFile);
 
       if (missingDocs.length > 0) {
