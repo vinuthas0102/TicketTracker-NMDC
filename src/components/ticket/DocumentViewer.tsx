@@ -80,7 +80,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, onClose }) => {
             <div className="text-center">
               <p className="text-lg font-medium mb-2">Failed to load image</p>
               <p className="text-sm text-gray-400 mb-4">File: {file.name}</p>
-              <p className="text-xs text-gray-400 mb-4">URL: {file.url}</p>
+              <p className="text-xs text-gray-400 mb-4">URL: {file.url?.substring(0, 50)}...</p>
               <button
                 onClick={retryImageLoad}
                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
@@ -97,28 +97,25 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, onClose }) => {
         );
       }
 
-      if (imageLoading) {
-        return (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-sm">Loading image...</p>
-          </div>
-        );
-      }
-
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full relative">
+          {imageLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 z-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+              <p className="text-sm text-gray-500">Loading image...</p>
+            </div>
+          )}
           <img
             src={file.url}
             alt={file.name}
             className="max-w-full max-h-full object-contain"
             style={{
               transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-              transition: 'transform 0.3s ease'
+              transition: 'transform 0.3s ease',
+              opacity: imageLoading ? 0 : 1
             }}
             onLoad={handleImageLoad}
             onError={handleImageError}
-            crossOrigin="anonymous"
           />
         </div>
       );
